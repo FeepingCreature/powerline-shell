@@ -115,10 +115,16 @@ class Powerline(object):
     def bgcolor(self, code):
         return self.color('48', code)
 
-    def append(self, content, fg, bg, separator=None, separator_fg=None, sanitize=True):
+    def bold(self, boldme):
+        return self.color_template % '[1m' if boldme else ''
+
+    def unbold(self, boldme):
+        return self.color_template % '[21m' if boldme else ''
+
+    def append(self, content, fg, bg, separator=None, separator_fg=None, sanitize=True, bold=False):
         if self.args.shell == "bash" and sanitize:
             content = re.sub(r"([`$])", r"\\\1", content)
-        self.segments.append((content, fg, bg,
+        self.segments.append((content, fg, bg, bold,
             separator if separator is not None else self.separator,
             separator_fg if separator_fg is not None else bg))
 
@@ -137,10 +143,12 @@ class Powerline(object):
         return ''.join((
             self.fgcolor(segment[1]),
             self.bgcolor(segment[2]),
+            self.bold(segment[3]),
             segment[0],
             self.bgcolor(next_segment[2]) if next_segment else self.reset,
-            self.fgcolor(segment[4]),
-            segment[3]))
+            self.fgcolor(segment[5]),
+            self.unbold(segment[3]),
+            segment[4]))
 
 
 def find_config():
